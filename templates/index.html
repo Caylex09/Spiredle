@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiredle — Slay the Spire 2 Wordle</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">Spiredle</h1>
+            <p class="subtitle">Slay the Spire 2 · Card Wordle <span class="date-display" id="dateDisplay"></span></p>
+            <div class="mode-toggle" id="modeToggle">
+                <button class="mode-btn mode-active" data-mode="daily">每日挑战</button>
+                <button class="mode-btn" data-mode="random">随机连胜</button>
+                <button class="mode-btn" data-mode="past">回顾往期</button>
+            </div>
+            <div class="streak-display" id="streakDisplay" style="display:none">
+                <span class="streak-icon">🔥</span>
+                <span class="streak-count" id="streakCount">0</span>
+            </div>
+            <nav class="toolbar">
+                <button class="btn-icon" id="themeBtn" title="Theme">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="refBtn" title="Reference">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                    </svg>
+                </button>
+
+                <button class="btn-icon" id="helpBtn" title="How to Play">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="langBtn" title="Language">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Language Selector Modal -->
+        <div class="modal-overlay" id="langModal">
+            <div class="modal">
+                <h2>Language / 语言</h2>
+                <div class="lang-grid" id="langGrid">
+                    <button class="lang-btn" data-lang="eng">English</button>
+                    <button class="lang-btn" data-lang="zhs">中文</button>
+                    <button class="lang-btn" data-lang="dsu">Deutsch</button>
+                    <button class="lang-btn" data-lang="esp">Español</button>
+                    <button class="lang-btn" data-lang="fra">Français</button>
+                    <button class="lang-btn" data-lang="ita">Italiano</button>
+                    <button class="lang-btn" data-lang="jpn">日本語</button>
+                    <button class="lang-btn" data-lang="kor">한국어</button>
+                    <button class="lang-btn" data-lang="pol">Polski</button>
+                    <button class="lang-btn" data-lang="ptb">Português</button>
+                    <button class="lang-btn" data-lang="rus">Русский</button>
+                    <button class="lang-btn" data-lang="spa">Español</button>
+                    <button class="lang-btn" data-lang="tha">ไทย</button>
+                    <button class="lang-btn" data-lang="tur">Türkçe</button>
+                </div>
+                <button class="btn-close" id="langClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Help Modal -->
+        <div class="modal-overlay" id="helpModal">
+            <div class="modal">
+                <h2 id="helpModalTitle">How to Play</h2>
+                <p id="helpIntro">Guess the Slay the Spire 2 card in <strong>6 tries</strong>.</p>
+                <p id="helpEachGuess">Each guess must be a valid card name or ID.</p>
+                <div class="help-examples">
+                    <div class="help-row">
+                        <span class="tile tile-correct">R</span><span class="tile tile-correct">a</span><span
+                            class="tile tile-correct">r</span><span class="tile tile-correct">e</span>
+                    </div>
+                    <p id="helpGreen">Green = correct attribute.</p>
+                    <div class="help-row">
+                        <span class="tile tile-yellow">C</span><span class="tile tile-yellow">o</span><span
+                            class="tile tile-yellow">s</span><span class="tile tile-yellow">t</span>
+                    </div>
+                    <p id="helpYellow">Yellow = partially correct (e.g. same cost but different star cost).</p>
+                    <div class="help-row">
+                        <span class="tile tile-absent">T</span><span class="tile tile-absent">y</span><span
+                            class="tile tile-absent">p</span><span class="tile tile-absent">e</span>
+                    </div>
+                    <p id="helpGray">Gray = not correct.</p>
+                </div>
+                <p id="helpAttribs"><strong>Attributes:</strong> Name, Rarity, Type, Cost, Color, Keywords</p>
+                <p id="helpDaily">Updates daily at <strong>00:00 UTC</strong>.</p>
+                <button class="btn-close" id="helpClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Theme Modal -->
+        <div class="modal-overlay" id="themeModal">
+            <div class="modal">
+                <h2 id="themeModalTitle">Theme</h2>
+                <div class="theme-grid">
+                    <button class="theme-btn" data-theme-val="dark">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <span class="theme-label" id="themeDark">Dark</span>
+                    </button>
+                    <button class="theme-btn" data-theme-val="light">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                        <span class="theme-label" id="themeLight">Light</span>
+                    </button>
+                    <button class="theme-btn" data-theme-val="system">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                        <span class="theme-label" id="themeSystem">System</span>
+                    </button>
+                </div>
+                <button class="btn-close" id="themeClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Translation Reference Modal -->
+        <div class="modal-overlay" id="refModal">
+            <div class="modal ref-modal">
+                <h2 id="refModalTitle">Translation Reference</h2>
+                <div id="refContent" class="ref-content">
+                    <p style="color:var(--text-dim);text-align:center;">Loading...</p>
+                </div>
+                <button class="btn-close" id="refClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+
+        <!-- History Modal -->
+        <div class="modal-overlay" id="historyModal">
+            <div class="modal">
+                <h2 id="historyTitle">Past Challenges</h2>
+                <div id="historyList" class="history-list">
+                    <p style="color:var(--text-dim);text-align:center;">Loading...</p>
+                </div>
+                <button class="btn-close" id="historyClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Card Picker Modal -->
+        <div class="modal-overlay" id="cardPickerModal">
+            <div class="modal card-picker-modal">
+                <h2>Select a Card</h2>
+                <div class="picker-search-wrap">
+                    <input type="text" id="pickerSearch" autocomplete="off" placeholder="Search card name or ID..."
+                        class="picker-search" />
+                    <span class="picker-count" id="pickerCount"></span>
+                </div>
+                <div class="picker-grid" id="pickerGrid"></div>
+                <button class="btn-close" id="pickerClose">✕</button>
+            </div>
+        </div>
+
+        <!-- Guess Input -->
+        <div class="input-container">
+            <button class="btn-guess" id="guessBtn">选择卡牌</button>
+            <div class="selected-card-name" id="selectedCardName"></div>
+        </div>
+
+        <!-- Keyboard Hint -->
+        <div class="hint" id="hint"></div>
+
+        <!-- Result -->
+        <div class="result" id="result"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
