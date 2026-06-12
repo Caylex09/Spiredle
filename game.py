@@ -90,7 +90,7 @@ def _build_feedback(card_id, guess_card, lang="eng"):
     }
 
     if is_correct:
-        feedback["answer"] = answer.to_dict()
+        feedback["answer"] = answer.to_dict(lang, names)
 
     return answer, feedback
 
